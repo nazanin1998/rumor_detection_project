@@ -11,9 +11,19 @@ from lib.read_datasets.pheme.json_helper import read_json_file
 class ReadPhemeDataset:
     def __init__(self, path):
         self.path = path
+        self.events = None
+        self.df = None
+
+    def read_json_dataset(self):
+        print("Read Json Dataset ...", end=' => ')
         self.events = self.__extract_events_from_dataset()
-        # self.print_summery()
         self.__extract_csv_from_events()
+        print(self.df.shape)
+
+    def read_csv_dataset(self):
+        print("Read CSV Dataset ...", end=' => ')
+        self.df = pd.read_csv(constants.PHEME_CSV_PATH, lineterminator='\n')
+        print(self.df.shape)
 
     def print_summery(self):
         index = 0
@@ -22,7 +32,6 @@ class ReadPhemeDataset:
             print(event.to_string(index=index))
 
     def __extract_events_from_dataset(self):
-        print("Extracting Events From DataSet ...", end=' => ')
         events = []
         event_dirs = self.__read_directories(path=self.path)
 
@@ -38,18 +47,14 @@ class ReadPhemeDataset:
                 elif inner_event_dir == constants.RUMOURS:
                     event.rumors = self._tweet_trees_extraction(event_dir, inner_event_dir)
             events.append(event)
-        print("Done!")
         return events
 
     def __extract_csv_from_events(self):
-        print('Extracting Csv from Events ... => ', end='')
         tweets = self._extract_tweet_list_from_events()
-        tweets_dataframes = pd.DataFrame(tweets)
-        print('Done! => pheme_csv.shape is : ' + str(tweets_dataframes.shape) + ". ", end='')
+        self.df = pd.DataFrame(tweets)
 
         os.makedirs(constants.PHEME_CSV_DIR, exist_ok=True)
-        tweets_dataframes.to_csv(constants.PHEME_CSV_PATH, index=False)
-        print('Saved Csv at => ' + constants.PHEME_CSV_PATH)
+        self.df.to_csv(constants.PHEME_CSV_PATH, index=False)
 
     def _extract_tweet_list_from_events(self):
         tweets = []
@@ -105,6 +110,13 @@ class ReadPhemeDataset:
         try:
             if path is None:
                 path = self.path
+            return os.listdir(path)
+        except:
+            return None
+
+    @staticmethod
+    def read_directories(path):
+        try:
             return os.listdir(path)
         except:
             return None
