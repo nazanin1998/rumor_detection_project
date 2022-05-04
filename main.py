@@ -12,7 +12,9 @@ readPhemeDataset = ReadPhemeDataset(path=env['PHEME_DATASET_DIR'])
 if dirs is None or not dirs.__contains__(constants.PHEME_CSV_NAME):
     readPhemeDataset.read_json_dataset()
 else:
-    events = readPhemeDataset.read_csv_dataset()
+    readPhemeDataset.read_csv_dataset()
+
+PreProcessing(df=readPhemeDataset.df).preprocess()
 
 
 
