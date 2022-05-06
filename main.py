@@ -14,7 +14,6 @@ if dirs is None or not dirs.__contains__(constants.PHEME_CSV_NAME):
 else:
     readPhemeDataset.read_csv_dataset()
 
+# PreProcessing(df=readPhemeDataset.df).test(
+#     "@PaulSte42038667 @riwired I'm not trivialising a tragedy... I'll want hard questions asked and real answers")
 PreProcessing(df=readPhemeDataset.df).preprocess()
-
-
-
