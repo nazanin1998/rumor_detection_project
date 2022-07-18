@@ -25,6 +25,11 @@ class ReadPhemeDataset:
         self.df = pd.read_csv(constants.PHEME_CSV_PATH, lineterminator='\n')
         print(self.df.shape)
 
+    def read_preprocessed_csv_dataset(self):
+        print("Read Preprocessed CSV Dataset ...", end=' => ')
+        self.df = pd.read_csv(constants.PHEME_PRE_PROCESS_CSV_PATH, lineterminator='\n')
+        print(self.df.shape)
+
     def print_summery(self):
         index = 0
         for event in self.events:

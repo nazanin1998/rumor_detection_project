@@ -4,48 +4,76 @@ from lib.preprocessing.pheme.special_characters_removal.special_char_removal_imp
 from lib.preprocessing.pheme.stop_word_removal.stop_word_removal_impl import StopWordRemovalImpl
 from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
 from lib.preprocessing.pheme.word_root.word_root_lemmatization_impl import WordRootLemmatizationImpl
+from os import environ as env
 
 
 class PreProcessing:
     def __init__(self, df):
         self.df = df
         self.i = 0
+        self.expanded_text = ''
 
     def preprocess(self):
-        self.__preprocess('@AP plus 1 Turkish citizen..')
-        self.__preprocess(
-            '@AP @FAANews @AirportKRAL An automated sys should be installed that takes command of the acft if it goes off course for x amount of time')
-        # self.df['text'] = self.df['text'].apply(
-        #     lambda x: self.__preprocess(x))
-        # self.df.to_csv('./dataset/pheme_csv/pheme_preprocess_lemmatization.csv', index=False)
+        self.df['user.description'] = self.df['user.description'].apply(
+            lambda x: self.__preprocess(x))
+        self.df.to_csv(env['PHEME_DATASET_PREPROCESS_PATH'], index=False)
+        self.df['text'] = self.df['text'].apply(
+            lambda x: self.__preprocess(x))
+        self.df.to_csv(env['PHEME_DATASET_PREPROCESS_PATH'], index=False)
 
     def __preprocess(self, text):
         self.i += 1
         print(self.i, end=', ')
-        expanded_text = ExpandContractionsImpl().expand(text=text)
+        self.expanded_text = ExpandContractionsImpl().expand(text=text)
 
-        text_without_username = RemoveUsernameImpl().remove(text=expanded_text)
+        self.text_without_username = RemoveUsernameImpl().remove_usernames(text=self.expanded_text)
+        self.text_without_links, links = RemoveUsernameImpl().remove_links(text=self.text_without_username)
+        self.text_without_emails, emails = RemoveUsernameImpl().remove_emails(text=self.text_without_links)
 
-        tokens = TokenizingImpl().tokenize(sentence=text_without_username)
+        self.tokens = TokenizingImpl().tokenize(sentence=self.text_without_emails)
 
-        words_roots = WordRootLemmatizationImpl().find_batch_words_root(tokens=tokens)
+        self.words_roots = WordRootLemmatizationImpl().find_batch_words_root(tokens=self.tokens)
 
-        tokens_without_sw = StopWordRemovalImpl().remove(tokens=words_roots)
+        self.tokens_without_sw = StopWordRemovalImpl().remove(tokens=self.words_roots)
 
-        tokens_without_sc = SpecialCharacterRemovalImpl().remove(tokens=tokens_without_sw)
+        self.tokens_without_sc = SpecialCharacterRemovalImpl().remove(tokens=self.tokens_without_sw)
 
-        sentence = self.tokens_to_sentence(tokens_without_sc)
-        sentence = sentence.lower()
-
-        return sentence
+        self.sentence = self.tokens_to_sentence(tokens=self.tokens_without_sc, links=links, emails=emails)
+        self.sentence = self.sentence.lower()
+        self.print_summery()
+        return self.sentence
 
     @staticmethod
-    def tokens_to_sentence(tokens):
+    def tokens_to_sentence(tokens, emails, links):
+        if tokens is None:
+            return ''
         sentence = ''
         for token in tokens:
             sentence = sentence + ' ' + token
+        if emails is not None:
+            for email in emails:
+                sentence = sentence + ' ' + email
+        if links is not None:
+            for link in links:
+                sentence = sentence + ' ' + link
         sentence = sentence.strip()
         return sentence
+
+    def print_summery(self):
+        print("1 => expanded_text")
+        print(self.expanded_text)
+        # print("2 => text_without_username")
+        # print(self.text_without_username)
+        # print("3 => tokens")
+        # print(self.tokens)
+        # print("4 => words_roots")
+        # print(self.words_roots)
+        # print("5 => tokens_without_sw")
+        # print(self.tokens_without_sw)
+        # print("6 => tokens_without_sc")
+        # print(self.tokens_without_sc)
+        print("7 => sentence")
+        print(self.sentence)
 
     def remove_redundant_information(self):
         print('remove_redundant_information')

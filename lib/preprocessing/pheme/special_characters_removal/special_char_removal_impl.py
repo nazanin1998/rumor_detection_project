@@ -3,6 +3,8 @@ from lib.preprocessing.pheme.special_characters_removal.special_char_removal imp
 
 class SpecialCharacterRemovalImpl(SpecialCharacterRemoval):
     def remove(self, tokens):
+        if tokens is None:
+            return None
         tokens_without_special_char = []
         for token in tokens:
             if str(''.join(filter(str.isalnum, token))) != '':

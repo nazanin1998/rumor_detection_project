@@ -5,5 +5,7 @@ from lib.preprocessing.pheme.stop_word_removal.stop_word_removal import StopWord
 
 class StopWordRemovalImpl(StopWordRemoval):
     def remove(self, tokens):
+        if tokens is None:
+            return None
         tokens_without_sw = [word for word in tokens if not word in stopwords.words()]
         return tokens_without_sw

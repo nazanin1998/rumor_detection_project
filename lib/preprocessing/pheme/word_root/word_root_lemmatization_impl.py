@@ -4,6 +4,9 @@ from lib.preprocessing.pheme.word_root.word_root import WordRoot
 
 class WordRootLemmatizationImpl(WordRoot):
     def find_batch_words_root(self, tokens):
+        if tokens is None:
+            return None
+
         wordnet_lemmatizer = WordNetLemmatizer()
 
         lemma_tokens = []
@@ -11,5 +14,3 @@ class WordRootLemmatizationImpl(WordRoot):
             value = wordnet_lemmatizer.lemmatize(w, pos="v")
             lemma_tokens.append(value)
         return lemma_tokens
-
-
