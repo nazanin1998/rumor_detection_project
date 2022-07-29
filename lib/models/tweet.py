@@ -30,6 +30,12 @@ class Tweet:
         text = self.text
         user.verified = self.__normalize_boolean(user.verified)
         user.notifications = self.__normalize_boolean(user.notifications)
+        user.protected = self.__normalize_boolean(user.protected)
+        user.default_profile = self.__normalize_boolean(user.default_profile)
+        user.default_profile_image = self.__normalize_boolean(user.default_profile_image)
+        user.follow_request_sent = self.__normalize_boolean(user.follow_request_sent)
+        user.profile_background_tile = self.__normalize_boolean(user.profile_background_tile)
+        user.profile_use_background_image = self.__normalize_boolean(user.profile_use_background_image)
         self.truncated = self.__normalize_boolean(self.truncated)
         return {
             'event': event,
@@ -133,8 +139,12 @@ class Tweet:
     def __normalize_boolean(input_bool):
         if input_bool:
             return 0
-        else:
+        elif not input_bool:
             return 1
+        if input_bool == 'FALSE':
+            return 1
+        elif input_bool == 'TRUE':
+            return 0
 
     @staticmethod
     def tweet_file_to_obj(path):

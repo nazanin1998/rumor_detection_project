@@ -1,10 +1,11 @@
+import numpy
+
 from lib.preprocessing.pheme.expand_contactions.expand_contractions_impl import ExpandContractionsImpl
 from lib.preprocessing.pheme.remove_username.remove_username_impl import RemoveUsernameImpl
 from lib.preprocessing.pheme.special_characters_removal.special_char_removal_impl import SpecialCharacterRemovalImpl
 from lib.preprocessing.pheme.stop_word_removal.stop_word_removal_impl import StopWordRemovalImpl
 from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
 from lib.preprocessing.pheme.word_root.word_root_lemmatization_impl import WordRootLemmatizationImpl
-from os import environ as env
 import lib.constants as constants
 
 from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
@@ -12,7 +13,7 @@ from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
 
 class PreProcessing:
     def __init__(self, df):
-        print("\n<< PHASE-2: PREPROCESS >>\n")
+        print("\n<< PHASE-2: PREPROCESS >>")
         self.df = df
         self.i = 0
         preprocess_dir = FileDirHandler.read_directories(directory=constants.PHEME_PRE_PROCESS_CSV_DIR)
@@ -21,8 +22,7 @@ class PreProcessing:
             self.preprocess()
         else:
             self.read_preprocessed_csv_dataset()
-        print("\n<< PHASE-2: PREPROCESS DONE>>\n")
-
+        print("<< PHASE-2: PREPROCESS DONE>>")
 
     def preprocess(self):
         self.df['user.description'] = self.df['user.description'].apply(
@@ -52,6 +52,8 @@ class PreProcessing:
         self.sentence = self.tokens_to_sentence(tokens=self.tokens_without_sc, links=links, emails=emails)
         self.sentence = self.sentence.lower()
         self.print_summery()
+        if self.sentence is None:
+            return numpy.NaN
         return self.sentence
 
     def read_preprocessed_csv_dataset(self):
@@ -76,7 +78,7 @@ class PreProcessing:
         return sentence
 
     def print_summery(self):
-        print("1 => expanded_text")
+        print("\n1 => expanded_text")
         print(self.expanded_text)
         # print("2 => text_without_username")
         # print(self.text_without_username)
@@ -102,59 +104,3 @@ class PreProcessing:
 
     def normalization(self):
         print('normalization')
-    # def remove_username(self, text):
-    #     split_texts = text.split(' ')
-    #     text_without_username = ''
-    #     for split_text in split_texts:
-    #         if not split_text.startswith("@"):
-    #             text_without_username = text_without_username + ' ' + split_text
-    #     return text_without_username
-
-    # def stemming(self, tokens):
-    #     ps = PorterStemmer()
-    #
-    #     stemmed_tokens = []
-    #     for w in tokens:
-    #         value = ps.stem(w)
-    #         stemmed_tokens.append(value)
-    #     return stemmed_tokens
-
-    # def lemmatization(self, tokens):
-    #     wordnet_lemmatizer = WordNetLemmatizer()
-    #
-    #     lemma_tokens = []
-    #     for w in tokens:
-    #         value = wordnet_lemmatizer.lemmatize(w, pos="v")
-    #         lemma_tokens.append(value)
-    #     return lemma_tokens
-
-    # @staticmethod
-    # def remove_special_characters(tokens):
-    #     tokens_without_special_char = []
-    #     for token in tokens:
-    #         if str(''.join(filter(str.isalnum, token))) != '':
-    #             tokens_without_special_char.append(''.join(filter(str.isalnum, token)))
-    #     return tokens_without_special_char
-
-    # @staticmethod
-    # def tokenizing(text):
-    #     tokenizer = BertTokenizer(vocab_file='./vocab.txt')
-    #     tokens = tokenizer.tokenize(text)
-    #     return tokens
-
-    # @staticmethod
-    # def stop_word_removal(tokens):
-    #     tokens_without_sw = [word for word in tokens if not word in stopwords.words()]
-    #     return tokens_without_sw
-
-    # def expand_contractions(self, text):
-    #     expanded_words = []
-    #     for word in text.split():
-    #         try:
-    #             expanded_words.append(contractions.fix(word))
-    #         except:
-    #             print("baby", end=' ')
-    #             print(word, end=' ')
-    #             break
-    #
-    #     return ' '.join(expanded_words)

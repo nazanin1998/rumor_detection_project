@@ -15,7 +15,7 @@ class RemoveUsernameImpl(RemoveUsername):
 
     def remove_emails(self, text):
         if text is None:
-            return None
+            return None, None
 
         emails = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", text)
         for email in emails:
@@ -24,9 +24,9 @@ class RemoveUsernameImpl(RemoveUsername):
 
     def remove_links(self, text):
         if text is None:
-            return None
+            return None, None
 
-        urls = re.findall('https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', text)
+        urls = re.findall(r'(https?://\S+)', text)
         for url in urls:
             text = str(text).replace(url, '')
         return text, urls
