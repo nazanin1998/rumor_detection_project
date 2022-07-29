@@ -5,21 +5,29 @@ from lib.preprocessing.pheme.stop_word_removal.stop_word_removal_impl import Sto
 from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
 from lib.preprocessing.pheme.word_root.word_root_lemmatization_impl import WordRootLemmatizationImpl
 from os import environ as env
+import lib.constants as constants
+
+from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
 
 
 class PreProcessing:
     def __init__(self, df):
         self.df = df
         self.i = 0
-        self.expanded_text = ''
+        preprocess_dir = FileDirHandler.read_directories(directory=constants.PHEME_PRE_PROCESS_CSV_DIR)
+
+        if preprocess_dir is None or not preprocess_dir.__contains__(constants.PHEME_PRE_PROCESS_CSV_NAME):
+            self.preprocess()
+        else:
+            self.read_preprocessed_csv_dataset()
 
     def preprocess(self):
         self.df['user.description'] = self.df['user.description'].apply(
             lambda x: self.__preprocess(x))
-        self.df.to_csv(env['PHEME_DATASET_PREPROCESS_PATH'], index=False)
+        self.df.to_csv(constants.PHEME_PRE_PROCESS_CSV_PATH, index=False)
         self.df['text'] = self.df['text'].apply(
             lambda x: self.__preprocess(x))
-        self.df.to_csv(env['PHEME_DATASET_PREPROCESS_PATH'], index=False)
+        self.df.to_csv(constants.PHEME_PRE_PROCESS_CSV_PATH, index=False)
 
     def __preprocess(self, text):
         self.i += 1
@@ -42,6 +50,11 @@ class PreProcessing:
         self.sentence = self.sentence.lower()
         self.print_summery()
         return self.sentence
+
+    def read_preprocessed_csv_dataset(self):
+        print("Read Preprocessed CSV Dataset ...", end=' => ')
+        self.df = FileDirHandler.read_csv_file(path=constants.PHEME_PRE_PROCESS_CSV_PATH)
+        print(self.df.shape)
 
     @staticmethod
     def tokens_to_sentence(tokens, emails, links):

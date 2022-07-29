@@ -1,6 +1,5 @@
 from lib.models.user import User
 
-
 # is_rumour , thread, in_reply_tweet, event, tweet_id, is_source_tweet, in_reply_user, user_id, tweet_length,
 # symbol_count, user_mentions, urls_count, media_count, hashtags_count, retweet_count
 # favorite_count, mentions_count, is_truncated, created, has_smile_emoji, sensitive
@@ -22,6 +21,8 @@ from lib.models.user import User
 # user.utc_dist, hasperiod, number_punct, negativewordcount, positivewordcount, capitalratio,
 # contentlength, sentimentscore, Noun, has_url_in_text
 #
+from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
+
 
 class Tweet:
     def to_json(self, is_rumour, event, is_source_tweet):
@@ -33,7 +34,6 @@ class Tweet:
         return {
             'event': event,
             'text': text,
-            'user_id': user.id,
             'is_rumour': is_rumour,
             'tweet_id': self.id,
             'tweet_length': len(text),
@@ -50,23 +50,39 @@ class Tweet:
             'in_reply_user_id': self.in_reply_to_user_id,
             'in_reply_tweet_id': self.in_reply_to_status_id,
 
+            'user.id': user.id,
             'user.name': user.name,
             'user.verified': user.verified,
+            'user.protected': user.protected,
             'user.name_length': len(user.name),
-            'user.location': len(user.location),
+            'user.location': user.location,
             'user.description': user.description,
             'user.time_zone': user.time_zone,
-            'user.created_at': len(user.created_at),
+            'user.created_at': user.created_at,
             'user.listed_count': user.listed_count,
+            'user.default_profile': user.default_profile,
             'user.tweets_count': user.statuses_count,
+            'user.statuses_count': user.statuses_count,
             'user.friends_count': user.friends_count,
+            'user.favourites_count': user.favourites_count,
             'user.followers_count': user.followers_count,
-            'user.notifications': user.notifications
+            'user.notifications': user.notifications,
+            'user.profile_text_color': user.profile_text_color,
+            'user.follow_request_sent': user.follow_request_sent,
+            'user.default_profile_image': user.default_profile_image,
+            'user.profile_background_tile': user.profile_background_tile,
+            'user.profile_image_url_https': user.profile_image_url_https,
+            'user.profile_sidebar_fill_color': user.profile_sidebar_fill_color,
+            'user.profile_use_background_image': user.profile_use_background_image,
+            'user.profile_background_image_url_https': user.profile_background_image_url_https
+
         }
 
-    def __init__(self, id, source, truncated, favorited, retweeted, in_reply_to_user_id, retweet_count, contributors,
+    def __init__(self, id, source, truncated, favorited, retweeted, in_reply_to_user_id, retweet_count,
+                 contributors,
                  text,
                  in_reply_to_status_id, urls, hashtags, user_mentions, created_at, favorite_count, user, symbols):
+
         self.id = id
         self.text = text
         self.user = user
@@ -91,8 +107,8 @@ class Tweet:
         text = js_obj['text']
         source = js_obj['source']
         truncated = js_obj['truncated']
-        urls = js_obj['entities']['urls']
         user = User.from_json(js_obj['user'])
+        urls = js_obj['entities']['urls']
         symbols = js_obj['entities']['symbols']
         hashtags = js_obj['entities']['hashtags']
         user_mentions = js_obj['entities']['user_mentions']
@@ -114,27 +130,34 @@ class Tweet:
                      in_reply_to_status_id=in_reply_to_status_id)
 
     @staticmethod
-    def __normalize_boolean( input_bool):
+    def __normalize_boolean(input_bool):
         if input_bool:
             return 0
         else:
             return 1
 
-# {
-#   "contributors": null,
-#   "truncated": false,
-#   "text": "Charlie Hebdo\u2019s Last Tweet Before Shootings http:\/\/t.co\/9Oa2xAqOcM http:\/\/t.co\/skJHNEQcn0",
-#   "in_reply_to_status_id": null,
-#   "id": 552784898743099392,
-#   "favorite_count": 20,
-#   "source": "<a href=\"https:\/\/about.twitter.com\/products\/tweetdeck\" rel=\"nofollow\">TweetDeck<\/a>",
-#   "retweeted": false,
-#   "coordinates": null,
-#   "entities": {
-#     "symbols": [],
-#     "user_mentions": [],
-#     "hashtags": [],
-#     "urls": [
+    @staticmethod
+    def tweet_file_to_obj(path):
+        tweet_json_obj = FileDirHandler.read_json_file(path=path)
+        if tweet_json_obj is None:
+            return None
+        return Tweet.from_json(tweet_json_obj)
+    #
+    # {
+    #   "contributors": null,
+    #   "truncated": false,
+    #   "text": "Charlie Hebdo\u2019s Last Tweet Before Shootings http:\/\/t.co\/9Oa2xAqOcM http:\/\/t.co\/skJHNEQcn0",
+    #   "in_reply_to_status_id": null,
+    #   "id": 552784898743099392,
+    #   "favorite_count": 20,
+    #   "source": "<a href=\"https:\/\/about.twitter.com\/products\/tweetdeck\" rel=\"nofollow\">TweetDeck<\/a>",
+    #   "retweeted": false,
+    #   "coordinates": null,
+    #   "entities": {
+    #     "symbols": [],
+    #     "user_mentions": [],
+    #     "hashtags": [],
+    #     "urls": [
 #       {
 #         "url": "http:\/\/t.co\/9Oa2xAqOcM",
 #         "indices": [
