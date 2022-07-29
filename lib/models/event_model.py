@@ -5,6 +5,6 @@ class EventModel:
         self.non_rumors = non_rumors
 
     def to_string(self, index=''):
-        return'Event ' + str(index) + ' ==> ' + self.name + '\trumours : ' + str(
-            len(self.rumors)) + '\tnon_rumours : ' + str(
+        return'Event ' + str(index) + ' ==> ' + self.name + '\t==>\trumours : ' + str(
+            len(self.rumors)) + ',\tnon_rumours : ' + str(
             len(self.non_rumors))

@@ -7,7 +7,8 @@ class FileDirHandler:
     @staticmethod
     def read_directories(directory):
         try:
-            return os.listdir(directory)
+            dirs = os.listdir(directory)
+            return dirs
         except:
             return None
 

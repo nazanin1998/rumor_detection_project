@@ -15,9 +15,10 @@ class ReadPhemeJsonDataset:
         self.directory = constants.PHEME_DIR
 
     def read_and_save_csv(self):
-        print("Read Json Dataset ...", end=' => ')
+        print("Read Json Dataset ...", end=' => DIRECTORY is : ' + constants.PHEME_DIR+'\n\n')
         self.events = self.__extract_events_from_json_dataset()
         self.__extract_csv_from_events()
+        self.print_summery()
 
     def print_summery(self):
         index = 0
@@ -28,51 +29,25 @@ class ReadPhemeJsonDataset:
     def __extract_events_from_json_dataset(self):
         events = []
         event_dirs = FileDirHandler.read_directories(directory=self.directory)
-
         for event_dir in event_dirs:
-            event = self.__extract_event_from_dir(event_dir=event_dir)
+            event = self.__extract_event_from_dir(event_dir=self.directory + event_dir)
             if event is not None:
-                print(event.to_string())
                 events.append(event)
         return events
 
     def __extract_event_from_dir(self, event_dir):
-        inner_event_dirs = FileDirHandler.read_directories(directory=self.directory + event_dir)
+        inner_event_dirs = FileDirHandler.read_directories(directory=event_dir)
         if inner_event_dirs is None:
             return None
 
         event = EventModel(path=event_dir, rumors=[], non_rumors=[])
         for inner_event_dir in inner_event_dirs:
-            tweet_tree_dir = self.directory + event_dir + '/' + inner_event_dir
-            print(tweet_tree_dir)
+            tweet_tree_dir = event_dir + '/' + inner_event_dir
             if inner_event_dir == constants.NON_RUMOURS:
                 event.non_rumors = self.__tweet_trees_extraction(tweet_tree_dir=tweet_tree_dir)
             elif inner_event_dir == constants.RUMOURS:
                 event.rumors = self.__tweet_trees_extraction(tweet_tree_dir=tweet_tree_dir)
         return event
-
-    def __extract_csv_from_events(self):
-        tweets = self.__extract_tweet_list_from_events()
-        self.df = pd.DataFrame(tweets)
-
-        os.makedirs(constants.PHEME_CSV_DIR, exist_ok=True)
-        self.df.to_csv(constants.PHEME_CSV_PATH, index=False)
-
-    def __extract_tweet_list_from_events(self):
-        tweets = []
-        for event in self.events:
-
-            for rumour in event.rumors:
-                tweets.append(rumour.source_tweet.to_json(is_rumour=0, event=event.name, is_source_tweet=0))
-                for reaction in rumour.reactions:
-                    tweets.append(reaction.to_json(is_rumour=0, event=event.name, is_source_tweet=1))
-
-            for non_rumour in event.non_rumors:
-                tweets.append(non_rumour.source_tweet.to_json(is_rumour=1, event=event.name, is_source_tweet=0))
-                for reaction in non_rumour.reactions:
-                    tweets.append(reaction.to_json(is_rumour=1, event=event.name, is_source_tweet=1))
-
-        return tweets
 
     def __tweet_trees_extraction(self, tweet_tree_dir):
         tweet_trees = []
@@ -93,12 +68,36 @@ class ReadPhemeJsonDataset:
             reaction_ids = FileDirHandler.read_directories(reaction_dir)
 
             reactions = []
-            if reaction_ids is None:
-                continue
-            for reaction_id in reaction_ids:
-                reaction_path = reaction_dir + reaction_id
+            if reaction_ids is not None:
+                for reaction_id in reaction_ids:
+                    reaction_path = reaction_dir + reaction_id
 
-                reactions.append(Tweet.tweet_file_to_obj(path=reaction_path))
+                    reactions.append(Tweet.tweet_file_to_obj(path=reaction_path))
 
             tweet_trees.append(TweetTree(source_tweet=source_tweet_obj, reactions=reactions))
+
         return tweet_trees
+
+    def __extract_csv_from_events(self):
+        tweets = self.__extract_tweet_list_from_events()
+        self.df = pd.DataFrame(tweets)
+
+        os.makedirs(constants.PHEME_CSV_DIR, exist_ok=True)
+        self.df.to_csv(constants.PHEME_CSV_PATH, index=False)
+
+    def __extract_tweet_list_from_events(self):
+        tweets = []
+        for event in self.events:
+
+            for rumour in event.rumors:
+                tweets.append(rumour.source_tweet.to_json(is_rumour=0, event=event.name, is_source_tweet=0))
+                for reaction in rumour.reactions:
+                    tweets.append(reaction.to_json(is_rumour=0, event=event.name, is_source_tweet=1))
+
+            for non_rumour in event.non_rumors:
+                if non_rumour.source_tweet is not None:
+                    tweets.append(non_rumour.source_tweet.to_json(is_rumour=1, event=event.name, is_source_tweet=0))
+                for reaction in non_rumour.reactions:
+                    tweets.append(reaction.to_json(is_rumour=1, event=event.name, is_source_tweet=1))
+
+        return tweets

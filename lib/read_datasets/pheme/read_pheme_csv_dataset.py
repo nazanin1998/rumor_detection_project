@@ -9,5 +9,5 @@ class ReadPhemeCSVDataset:
         self.df = None
 
     def read_csv_dataset(self):
-        print("Read CSV Dataset ...", end=' => ')
+        print("Read CSV Dataset ...", end=' => DIRECTORY is : ' + constants.PHEME_CSV_DIR+'\n')
         self.df = FileDirHandler.read_csv_file(path=constants.PHEME_CSV_PATH)

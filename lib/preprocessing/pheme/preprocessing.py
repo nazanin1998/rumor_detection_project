@@ -12,6 +12,7 @@ from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
 
 class PreProcessing:
     def __init__(self, df):
+        print("\n<< PHASE-2: PREPROCESS >>\n")
         self.df = df
         self.i = 0
         preprocess_dir = FileDirHandler.read_directories(directory=constants.PHEME_PRE_PROCESS_CSV_DIR)
@@ -20,6 +21,8 @@ class PreProcessing:
             self.preprocess()
         else:
             self.read_preprocessed_csv_dataset()
+        print("\n<< PHASE-2: PREPROCESS DONE>>\n")
+
 
     def preprocess(self):
         self.df['user.description'] = self.df['user.description'].apply(

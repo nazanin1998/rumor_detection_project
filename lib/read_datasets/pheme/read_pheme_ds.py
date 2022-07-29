@@ -5,6 +5,8 @@ from lib.read_datasets.pheme.read_pheme_json_dataset import ReadPhemeJsonDataset
 
 
 def read_pheme_ds():
+    print("\n<< PHASE-1: READ DATA >>\n")
+
     pheme_csv_dirs = FileDirHandler.read_directories(directory=constants.PHEME_CSV_DIR)
 
     dataframe = None
@@ -16,5 +18,8 @@ def read_pheme_ds():
         readPhemeCSVDS = ReadPhemeCSVDataset()
         readPhemeCSVDS.read_csv_dataset()
         dataframe = readPhemeCSVDS.df
-    print(dataframe.shape)
+    print('\nCSV PATH IS: ' + constants.PHEME_CSV_PATH)
+    print('CSV SHAPE IS: ' + str(dataframe.shape))
+    print("\n<< PHASE-1: READ DATA DONE>>\n")
+
     return dataframe
