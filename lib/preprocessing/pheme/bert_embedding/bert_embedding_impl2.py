@@ -9,7 +9,7 @@ class BertEmbeddingImpl2(BertEmbedding):
     def bert_embed(self, text):
         # todo => we must divide sentences but this sentences can not divide because we remove sign from paragraph.
         # Our sentences we like to encode
-        sentences = [text]
+        sentences = text
 
         # Sentences are encoded by calling model.encode()
         embeddings = self.model.encode(sentences)
