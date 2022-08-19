@@ -1,4 +1,6 @@
-dataset/
+dataset/pheme_csv/
+dataset/pheme_preprocess/
+dataset/twitterhi/
 .idea/
 folder/
 __pycache__/
