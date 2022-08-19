@@ -12,9 +12,9 @@ class BertEmbeddingImpl2(BertEmbedding):
 
         # Sentences are encoded by calling model.encode()
         embeddings = model.encode(sentences)
-
-        # Print the embeddings
-        for sentence, embedding in zip(sentences, embeddings):
-            print("Sentence:", sentence)
-            print("Embedding:", embedding)
-            print("")
+        return embeddings
+        # # Print the embeddings
+        # for sentence, embedding in zip(sentences, embeddings):
+        #     print("Sentence:", sentence)
+        #     print("Embedding:", embedding)
+        #     print("")

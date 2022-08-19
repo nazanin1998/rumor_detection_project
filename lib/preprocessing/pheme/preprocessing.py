@@ -36,7 +36,7 @@ class PreProcessing:
 
     def __preprocess(self, text):
         self.i += 1
-        print(self.i, end=', ')
+        print(self.i)
         self.expanded_text = ExpandContractionsImpl().expand(text=text)
 
         self.text_without_username = RemoveUsernameImpl().remove_usernames(text=self.expanded_text)
@@ -53,7 +53,7 @@ class PreProcessing:
         self.sentence = self.tokens_to_sentence(tokens=self.tokens_without_sc, links=links, emails=emails)
         self.sentence = self.sentence.lower()
         self.embed = BertEmbeddingImpl2().bert_embed(self.sentence)
-        self.print_summery()
+        # self.print_summery()
         if self.embed is None:
             return numpy.NaN
         return self.embed
