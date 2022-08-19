@@ -1,10 +1,12 @@
 import numpy
 
+from lib.preprocessing.pheme.bert_embedding.bert_embedding_impl2 import BertEmbeddingImpl2
 from lib.preprocessing.pheme.expand_contactions.expand_contractions_impl import ExpandContractionsImpl
 from lib.preprocessing.pheme.remove_username.remove_username_impl import RemoveUsernameImpl
 from lib.preprocessing.pheme.special_characters_removal.special_char_removal_impl import SpecialCharacterRemovalImpl
 from lib.preprocessing.pheme.stop_word_removal.stop_word_removal_impl import StopWordRemovalImpl
-from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
+# from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
+# from lib.preprocessing.pheme.tokenizing.tokenizing_impl_bert import TokenizingImplBert
 from lib.preprocessing.pheme.word_root.word_root_lemmatization_impl import WordRootLemmatizationImpl
 import lib.constants as constants
 
@@ -40,8 +42,7 @@ class PreProcessing:
         self.text_without_username = RemoveUsernameImpl().remove_usernames(text=self.expanded_text)
         self.text_without_links, links = RemoveUsernameImpl().remove_links(text=self.text_without_username)
         self.text_without_emails, emails = RemoveUsernameImpl().remove_emails(text=self.text_without_links)
-
-        self.tokens = TokenizingImpl().tokenize(sentence=self.text_without_emails)
+        # self.tokens = TokenizingImplBert().tokenize(sentence=self.text_without_emails)
 
         self.words_roots = WordRootLemmatizationImpl().find_batch_words_root(tokens=self.tokens)
 
@@ -51,10 +52,11 @@ class PreProcessing:
 
         self.sentence = self.tokens_to_sentence(tokens=self.tokens_without_sc, links=links, emails=emails)
         self.sentence = self.sentence.lower()
+        self.embed = BertEmbeddingImpl2().bert_embed(self.sentence)
         self.print_summery()
-        if self.sentence is None:
+        if self.embed is None:
             return numpy.NaN
-        return self.sentence
+        return self.embed
 
     def read_preprocessed_csv_dataset(self):
         print("Read Preprocessed CSV Dataset ...", end=' => ')
