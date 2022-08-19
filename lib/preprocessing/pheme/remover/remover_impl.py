@@ -1,8 +1,13 @@
-from lib.preprocessing.pheme.remove_username.remove_username import RemoveUsername
+from lib.preprocessing.pheme.remover.remover import Remover
 import re
+from nltk.corpus import stopwords
 
 
-class RemoveUsernameImpl(RemoveUsername):
+class RemoverImpl(Remover):
+
+    def __init__(self):
+        self.stop_words = stopwords.words()
+
     def remove_usernames(self, text):
         if text is None:
             return None
@@ -30,3 +35,19 @@ class RemoveUsernameImpl(RemoveUsername):
         for url in urls:
             text = str(text).replace(url, '')
         return text, urls
+
+    def remove_stop_words(self, tokens):
+        if tokens is None:
+            return None
+        tokens_without_sw = [word for word in tokens if not word in self.stop_words]
+        return tokens_without_sw
+
+    def remove_special_characters(self, tokens):
+        if tokens is None:
+            return None
+        tokens_without_special_char = []
+        for token in tokens:
+            if str(''.join(filter(str.isalnum, token))) != '':
+                tokens_without_special_char.append(''.join(filter(str.isalnum, token)))
+        return tokens_without_special_char
+

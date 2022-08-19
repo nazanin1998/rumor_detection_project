@@ -2,15 +2,13 @@ import numpy
 
 from lib.preprocessing.pheme.bert_embedding.bert_embedding_impl2 import BertEmbeddingImpl2
 from lib.preprocessing.pheme.expand_contactions.expand_contractions_impl import ExpandContractionsImpl
-from lib.preprocessing.pheme.remove_username.remove_username_impl import RemoveUsernameImpl
-from lib.preprocessing.pheme.special_characters_removal.special_char_removal_impl import SpecialCharacterRemovalImpl
-from lib.preprocessing.pheme.stop_word_removal.stop_word_removal_impl import StopWordRemovalImpl
+from lib.preprocessing.pheme.remover.remover_impl import RemoverImpl
 from lib.preprocessing.pheme.tokenizing.tokenizing_impl import TokenizingImpl
-# from lib.preprocessing.pheme.tokenizing.tokenizing_impl_bert import TokenizingImplBert
 from lib.preprocessing.pheme.word_root.word_root_lemmatization_impl import WordRootLemmatizationImpl
 import lib.constants as constants
 
 from lib.read_datasets.pheme.file_dir_handler import FileDirHandler
+
 
 # //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
 class PreProcessing:
@@ -18,6 +16,13 @@ class PreProcessing:
         print("\n<< PHASE-2: PREPROCESS >>")
         self.df = df
         self.i = 0
+
+        self.expander = ExpandContractionsImpl()
+        self.remover = RemoverImpl()
+        self.tokenizer = TokenizingImpl()
+        self.lematizer = WordRootLemmatizationImpl()
+        self.bertEmbedder = BertEmbeddingImpl2()
+
         preprocess_dir = FileDirHandler.read_directories(directory=constants.PHEME_PRE_PROCESS_CSV_DIR)
 
         if preprocess_dir is None or not preprocess_dir.__contains__(constants.PHEME_PRE_PROCESS_CSV_NAME):
@@ -37,22 +42,23 @@ class PreProcessing:
     def __preprocess(self, text):
         self.i += 1
         print(self.i)
-        self.expanded_text = ExpandContractionsImpl().expand(text=text)
+        self.expanded_text = self.expander.expand(text=text)
 
-        self.text_without_username = RemoveUsernameImpl().remove_usernames(text=self.expanded_text)
-        self.text_without_links, links = RemoveUsernameImpl().remove_links(text=self.text_without_username)
-        self.text_without_emails, emails = RemoveUsernameImpl().remove_emails(text=self.text_without_links)
-        self.tokens = TokenizingImpl().tokenize(sentence=self.text_without_emails)
+        self.text_without_username = self.remover.remove_usernames(text=self.expanded_text)
+        self.text_without_links, links = self.remover.remove_links(text=self.text_without_username)
+        self.text_without_emails, emails = self.remover.remove_emails(text=self.text_without_links)
 
-        self.words_roots = WordRootLemmatizationImpl().find_batch_words_root(tokens=self.tokens)
+        self.tokens = self.tokenizer.tokenize(sentence=self.text_without_emails)
 
-        self.tokens_without_sw = StopWordRemovalImpl().remove(tokens=self.words_roots)
+        self.words_roots = self.lematizer.find_batch_words_root(tokens=self.tokens)
 
-        self.tokens_without_sc = SpecialCharacterRemovalImpl().remove(tokens=self.tokens_without_sw)
+        self.tokens_without_sw = self.remover.remove_stop_words(tokens=self.words_roots)
+
+        self.tokens_without_sc = self.remover.remove_special_characters(tokens=self.tokens_without_sw)
 
         self.sentence = self.tokens_to_sentence(tokens=self.tokens_without_sc, links=links, emails=emails)
         self.sentence = self.sentence.lower()
-        self.embed = BertEmbeddingImpl2().bert_embed(self.sentence)
+        self.embed = self.bertEmbedder.bert_embed(self.sentence)
         # self.print_summery()
         if self.embed is None:
             return numpy.NaN
